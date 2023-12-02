@@ -1,0 +1,54 @@
+#!/bin/sh
+#
+# Kernel hook for efibootmgr.
+#
+# Arguments passed to this script: $1 pkgname, $2 version.
+#
+# Use pkgname
+PKGNAME="$1"
+# Not version
+VERSION="$2"
+echo "$1"
+echo "$2"
+
+. "${ROOTDIR}/etc/default/efibootmgr-kernel-hook"
+if [ "x${MODIFY_EFI_ENTRIES}" != x1 ]; then
+	exit 0
+fi
+
+OPTIONS="${OPTIONS} initrd=/initramfs-${PKGNAME}.img"
+
+args=""
+if [ "x${DISK}" != x ]; then
+	args="-d $DISK"
+fi
+if [ "x${PART}" != x ]; then
+	args="$args -p $PART"
+fi
+
+# get major version, e.g. "4.8" for "linux4.8"
+major_version=$(echo $PKGNAME | cut -c 6-)
+
+# look for previous entry for this major kernel version
+existing_entry=$(efibootmgr | grep "Gentoo-${PKGNAME}")
+
+# get the boot order
+# this is required because when in the next step the existing entry is removed,
+# it is also removed from the order so it needs to be restored later
+bootorder=$(efibootmgr |grep "BootOrder: " |cut -c 12-)
+
+# if existing, remove it
+if [ "$existing_entry" != "" ]; then
+  /etc/kernel/postrm.d/zz-efibootmgr $PKGNAME
+fi
+
+# create the new entry
+efibootmgr -c $args -L "Gentoo-${PKGNAME}" -l /vmlinuz-${PKGNAME} -u "${OPTIONS}"
+echo -e "efibootmgr -qc $args -L \"Gentoo-${PKGNAME}\" -l /vmlinuz-${PKGNAME} -u \"${OPTIONS}\"" > /var/log/last_efibootmgr_entry
+
+echo "----------------------------------------------------------"
+echo "efibootmgr entry written to /var/log/last_efibootmgr_entry"
+echo "----------------------------------------------------------"
+
+# restore the boot order
+efibootmgr -qo $bootorder
