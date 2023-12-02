@@ -1,4 +1,4 @@
 MODIFY_EFI_ENTRIES=1
-OPTIONS="loglevel=3 quiet loglevel=3 fbcon=font:TER16x32 fbcon=nodefer crypt_root=UUID=e9d051c1-4f0f-4fb2-a7cf-a513f1d55236=crypt_root root=/dev/mapper/crypt_root"
+OPTIONS="loglevel=3 quiet loglevel=3 fbcon=font:TER16x32 fbcon=nodefer rd.luks.uuid=XXXX_XXXX_XXXX_XXXX rd.luks.name=XXXX_XXXX_XXXX_XXXX=crypt_root root=/dev/mapper/crypt_root"
 DISK="/dev/disk/by-id/ata-Samsung_SSD_860_EVO_500GB_S3Z1NY0M626144T"
 PART=1
