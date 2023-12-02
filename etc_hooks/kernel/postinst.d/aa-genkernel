@@ -1,0 +1,7 @@
+#!/bin/sh
+
+genkernel initramfs --luks
+
+echo "----------------------------------------------------------"
+echo "aa-genkernel executed successfully! "
+echo "----------------------------------------------------------"
